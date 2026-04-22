@@ -1,0 +1,52 @@
+# RustShield IDS - Default Configuration
+
+general:
+  name: "RustShield IDS"
+  description: "AI-Assisted Intrusion Detection System"
+  max_packet_queue: 10000
+  worker_threads: 4
+
+capture:
+  # Network interface to capture from (auto-detected if not specified)
+  interface: null
+  promiscuous: true
+  snaplen: 65535
+  buffer_size: 67108864  # 64MB
+  bpf_filter: null
+  exclude_ips:
+    - "127.0.0.1"
+    - "::1"
+
+detection:
+  rules_file: "rules/default.yaml"
+  rules_refresh_interval_secs: 300
+  enable_rule_based: true
+  enable_anomaly_detection: true
+  port_scan_threshold: 20
+  port_scan_time_window_secs: 60
+  syn_flood_threshold: 100
+  syn_flood_time_window_secs: 10
+
+ai:
+  model_path: "models/baseline.bin"
+  training_data_path: null
+  anomaly_threshold: 0.7
+  feature_window_secs: 30
+  min_samples_for_detection: 10
+  isolation_forest_contamination: 0.1
+  isolation_forest_n_estimators: 100
+
+logging:
+  log_file: "logs/rustshield.log"
+  log_format: "json"  # "json" or "pretty"
+  max_file_size_mb: 100
+  max_backup_files: 5
+  console_output: true
+
+alerting:
+  min_severity: "LOW"  # LOW, MEDIUM, HIGH, CRITICAL
+  rate_limit_per_minute: 100
+  deduplication_window_secs: 300
+  webhook_url: null
+  email_notifications: false
+  suppress_internal_traffic: true

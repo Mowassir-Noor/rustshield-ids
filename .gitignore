@@ -1,0 +1,32 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Generated files
+/logs/
+/models/
+*.log
+*.bin
+
+# Config (user-specific)
+rustshield.yaml
+!/config/default.yaml
+!/config/example.yaml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+*.pcap
+*.pcapng
+*.json
+!/config/*.yaml
+!/rules/*.yaml

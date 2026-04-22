@@ -1,0 +1,64 @@
+# RustShield IDS - Example Configuration
+# This file demonstrates all available configuration options
+
+# General system settings
+general:
+  name: "Production IDS Sensor"
+  description: "North-South traffic monitoring"
+  max_packet_queue: 50000
+  worker_threads: 8
+
+# Packet capture configuration
+capture:
+  interface: "eth0"  # Specific interface to monitor
+  promiscuous: true  # Capture all traffic on the segment
+  snaplen: 65535     # Maximum capture length
+  buffer_size: 134217728  # 128MB kernel buffer
+  bpf_filter: "tcp or udp or icmp"  # Berkeley Packet Filter
+  exclude_ips:       # IPs to ignore
+    - "127.0.0.1"
+    - "::1"
+    - "192.168.1.1"  # Gateway
+    - "10.0.0.0/8"   # Internal network
+
+# Detection engine settings
+detection:
+  rules_file: "rules/production.yaml"
+  rules_refresh_interval_secs: 600  # Reload rules every 10 minutes
+  enable_rule_based: true
+  enable_anomaly_detection: true
+  
+  # Port scan detection
+  port_scan_threshold: 15       # Unique ports per time window
+  port_scan_time_window_secs: 30  # Scan detection window
+  
+  # SYN flood detection
+  syn_flood_threshold: 200      # SYN packets per window
+  syn_flood_time_window_secs: 5   # Flood detection window
+
+# AI/ML anomaly detection settings
+ai:
+  model_path: "models/production_baseline.bin"
+  training_data_path: "training/normal_traffic.pcap"
+  anomaly_threshold: 0.75         # Score threshold (0.0 - 1.0)
+  feature_window_secs: 60         # Feature aggregation window
+  min_samples_for_detection: 20   # Minimum packets before detection
+  isolation_forest_contamination: 0.05  # Expected anomaly ratio
+  isolation_forest_n_estimators: 150    # Number of trees
+
+# Logging configuration
+logging:
+  log_file: "/var/log/rustshield/alerts.log"
+  log_format: "json"  # Options: json, pretty
+  max_file_size_mb: 500
+  max_backup_files: 10
+  console_output: true
+
+# Alert management
+alerting:
+  min_severity: "MEDIUM"           # Filter out LOW severity
+  rate_limit_per_minute: 50        # Alert throttling
+  deduplication_window_secs: 600   # Duplicate suppression
+  webhook_url: "https://alerts.security.internal/rustshield"
+  email_notifications: false
+  suppress_internal_traffic: true   # Ignore RFC1918 to RFC1918

@@ -1,0 +1,176 @@
+# RustShield IDS - Default Detection Rules
+# These rules provide basic coverage for common threats
+
+rules:
+  # SSH brute force detection
+  - id: "RULE-001"
+    name: "SSH Connection"
+    description: "Detects SSH connections on port 22"
+    severity: "Low"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 22
+    action: Log
+
+  # Telnet (insecure protocol)
+  - id: "RULE-002"
+    name: "Telnet Connection"
+    description: "Detects Telnet connections on port 23 (insecure)"
+    severity: "Medium"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 23
+    action: Alert
+
+  # DNS over TCP (potential tunneling)
+  - id: "RULE-003"
+    name: "DNS TCP Large Query"
+    description: "Detects large DNS queries over TCP (possible tunneling)"
+    severity: "Medium"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 53
+      - type: packet_size_range
+        min: 1000
+        max: 65535
+    action: Alert
+
+  # SMB External Access
+  - id: "RULE-004"
+    name: "SMB External Access"
+    description: "Detects SMB traffic to external destinations"
+    severity: "High"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 445
+    action: Alert
+
+  # RDP Connection
+  - id: "RULE-005"
+    name: "RDP Connection"
+    description: "Detects RDP connections on port 3389"
+    severity: "Low"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 3389
+    action: Log
+
+  # ICMP Tunneling
+  - id: "RULE-006"
+    name: "ICMP Tunnel Large Packet"
+    description: "Detects large ICMP packets (possible tunneling)"
+    severity: "Medium"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Icmp
+      - type: packet_size_range
+        min: 1000
+        max: 65535
+    action: Alert
+
+  # MySQL External
+  - id: "RULE-007"
+    name: "MySQL External Access"
+    description: "Detects MySQL connections from external sources"
+    severity: "High"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 3306
+    action: Alert
+
+  # Redis
+  - id: "RULE-008"
+    name: "Redis Unauthenticated"
+    description: "Detects Redis connections (often unauthenticated)"
+    severity: "High"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 6379
+    action: Alert
+
+  # Elasticsearch
+  - id: "RULE-009"
+    name: "Elasticsearch External"
+    description: "Detects Elasticsearch access from external sources"
+    severity: "High"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 9200
+    action: Alert
+
+  # MongoDB
+  - id: "RULE-010"
+    name: "MongoDB External"
+    description: "Detects MongoDB connections from external sources"
+    severity: "High"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 27017
+    action: Alert
+
+  # Docker API
+  - id: "RULE-011"
+    name: "Docker API Exposed"
+    description: "Detects Docker API access (container escape risk)"
+    severity: "Critical"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 2375
+    action: Alert
+
+  # Kubernetes API
+  - id: "RULE-012"
+    name: "Kubernetes API External"
+    description: "Detects K8s API access from external sources"
+    severity: "Critical"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 6443
+    action: Alert
+
+  # PostgreSQL
+  - id: "RULE-013"
+    name: "PostgreSQL External"
+    description: "Detects PostgreSQL connections from external sources"
+    severity: "High"
+    enabled: true
+    conditions:
+      - type: protocol
+        protocol: Tcp
+      - type: destination_port
+        port: 5432
+    action: Alert
