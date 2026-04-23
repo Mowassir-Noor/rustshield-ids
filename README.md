@@ -12,9 +12,11 @@ A hybrid, modular IDS combining signature-based detection with AI-driven anomaly
 ## Features
 
 - **Dual Detection Engine**: Rule-based signatures + ML anomaly detection
+- **Modular Detection System**: Pluggable detectors with `Detector` trait (PortScan, BruteForce, Anomaly, DoS)
 - **Real-time Packet Capture**: Native libpcap integration (TCP/UDP/ICMP)
 - **AI-Powered Analysis**: Isolation Forest-based anomaly detection with feature explainability
-- **Live TUI Dashboard**: Real-time monitoring with ratatui
+- **Advanced TUI Dashboard**: 4-panel layout with sparklines, aggregation, and keyboard navigation
+- **Attack Simulation**: Built-in traffic generator for testing (port scan, brute force, DoS, SYN flood)
 - **REST API + WebSocket**: Full HTTP API with real-time streaming
 - **Web Dashboard**: React-based SOC interface with live updates
 - **AI Analyst**: Explainable insights with MITRE ATT&CK mapping
@@ -104,6 +106,12 @@ vim rustshield.yaml
 # Start with TUI dashboard
 sudo ./target/release/rustshield run -i eth0 --dashboard
 
+# Start with advanced TUI dashboard (4-panel layout with sparklines)
+sudo ./target/release/rustshield run -i eth0 --advanced
+
+# Start with attack simulation (for testing/demo)
+sudo ./target/release/rustshield run -i eth0 --advanced --simulate
+
 # Start with JSON logging
 sudo ./target/release/rustshield run -i eth0 --json
 
@@ -153,6 +161,55 @@ rustshield serve -c production.yaml -a 0.0.0.0:8080
 
 ---
 
+## Advanced TUI Dashboard
+
+The advanced dashboard provides a 4-panel terminal interface for real-time monitoring with interactive controls.
+
+### Layout
+
+```
++----------------------+--------------------------+
+| 📊 System Stats      | 🚨 Live Alerts           |
+| - Packets/sec        | - Aggregated alerts      |
+| - Alerts/sec         | - Severity filtering     |
+| - Alert counts       | - Interactive selection  |
++----------------------+--------------------------+
+| ⚠️ Top Threats       | 📋 Alert Details         |
+| - Threat score gauge | - Detection reasoning    |
+| - Unique attackers   | - Source IPs & ports     |
+| - Pattern analysis   | - Recommendations        |
++----------------------+--------------------------+
+```
+
+### Keyboard Controls
+
+| Key | Action |
+|-----|--------|
+| `↑/↓` | Navigate alerts/threats |
+| `Tab` | Switch between panels |
+| `Enter` | View alert details |
+| `f` | Filter by severity (cycles: Critical → High → Medium → Low → All) |
+| `s` | Toggle simulation mode |
+| `/` | Search alerts |
+| `h` or `?` | Show help overlay |
+| `q` or `Esc` | Quit |
+
+### Severity Colors
+
+- 🔴 **Critical**: Red (flashing animation)
+- 🟠 **High**: Magenta
+- 🟡 **Medium**: Yellow  
+- 🔵 **Low**: Blue
+
+### Sparkline Charts
+
+Real-time ASCII bar charts show:
+- **Packets/sec**: Traffic volume over time
+- **Alerts/sec**: Detection rate with threshold coloring
+- **Threat Score**: Aggregate risk metric (0-100)
+
+---
+
 ## Detection Methodology
 
 ### 1. Signature-Based Detection
@@ -171,14 +228,36 @@ rules:
     action: "Alert"
 ```
 
-**Built-in Detections**:
-- Port scan detection (SYN/fin/RST analysis)
-- SYN flood detection (rate-based)
-- Insecure protocol detection (Telnet, unencrypted services)
-- Database external access (MySQL, PostgreSQL, MongoDB, Redis)
-- ICMP tunneling detection
+### 2. Modular Detector System
 
-### 2. Anomaly-Based Detection
+RustShield implements a pluggable detection architecture using the `Detector` trait:
+
+```rust
+#[async_trait::async_trait]
+pub trait Detector: Send + Sync {
+    fn name(&self) -> &str;
+    fn threshold(&self) -> f64;
+    async fn analyze(&self, packet: &PacketInfo, context: &DetectionContext) -> Option<DetectionResult>;
+}
+```
+
+**Built-in Detectors**:
+
+| Detector | Description | Triggers |
+|----------|-------------|----------|
+| `PortScanDetector` | Tracks unique destination ports per source | ≥10 unique ports in 10 seconds |
+| `BruteForceDetector` | Monitors connection attempts to services | ≥5 attempts to ports 22, 23, 25, 3389, etc. |
+| `AnomalyDetector` | Statistical analysis of traffic patterns | Packet size/rate anomalies, high SYN ratio |
+| `DosDetector` | Volume-based attack detection | ≥100 packets/sec from single source, SYN floods |
+
+**Detection Result** includes:
+- **Confidence Score**: 0.0 - 1.0 probability
+- **Reason**: Human-readable explanation
+- **Pattern**: Attack classification
+- **Severity**: Critical/High/Medium/Low
+- **Indicators**: Specific detection triggers
+
+### 3. Anomaly-Based Detection
 
 Uses statistical analysis and Isolation Forest algorithm:
 
@@ -201,6 +280,41 @@ Severity Thresholds:
   - High:     score ≥ 0.75
   - Medium:   score ≥ 0.6
   - Low:      score < 0.6
+```
+
+---
+
+## Attack Simulation
+
+Built-in traffic generator for testing and demonstrating detection capabilities without requiring real attacks.
+
+### Attack Types
+
+| Attack Type | Description | Detection |
+|-------------|-------------|-----------|
+| **Port Scan** | Sequential port probes (20-2000 ports) | PortScanDetector |
+| **Brute Force** | Connection attempts to SSH/RDP/DB services | BruteForceDetector |
+| **DoS** | High-volume traffic (500+ packets/sec) | DosDetector |
+| **SYN Flood** | SYN-only packets (50-1000 SYN/sec) | DosDetector, AnomalyDetector |
+
+### Intensity Levels
+
+- **Low**: ~10 packets/sec, 20 ports
+- **Medium**: ~50 packets/sec, 100 ports  
+- **High**: ~200 packets/sec, 500 ports
+- **Extreme**: ~1000 packets/sec, 2000 ports
+
+### Usage
+
+```bash
+# Enable simulation mode with advanced dashboard
+rustshield run --advanced --simulate
+
+# Simulation generates realistic attack traffic:
+# - Port scans across multiple port ranges
+# - Brute force attempts on common services (22, 3389, 5432)
+# - SYN flood attacks
+# - Volume-based DoS patterns
 ```
 
 ---
@@ -475,6 +589,9 @@ alerting:
 - [x] Web Dashboard (React)
 - [x] AI Analyst with MITRE ATT&CK mapping
 - [x] Event Correlation Engine
+- [x] Modular Detection System (Detector trait)
+- [x] Advanced TUI Dashboard (4-panel + sparklines)
+- [x] Attack Simulation Module
 - [ ] HTTP/HTTPS analysis via proxy integration
 - [ ] eBPF-based kernel-space filtering
 - [ ] Distributed sensor aggregation
@@ -494,38 +611,53 @@ rustshield-ids/
 ├── README.md               # This file
 ├── rustshield.yaml         # User configuration
 ├── src/
-│   ├── main.rs            # CLI entry point
-│   ├── api/               # REST API + WebSocket server
-│   │   ├── mod.rs         # API router
-│   │   ├── alerts.rs      # Alert endpoints
-│   │   ├── analytics.rs   # AI analyst
-│   │   ├── correlation.rs # Event correlation
-│   │   ├── health.rs      # Health checks
-│   │   ├── metrics.rs     # Prometheus metrics
-│   │   ├── stats.rs       # System stats
-│   │   └── websocket.rs   # WebSocket handler
-│   ├── capture/           # Packet capture (pcap)
-│   ├── detection/         # Rule engine + heuristics
-│   ├── ai/                # ML anomaly detection
-│   ├── logging/           # Alert management
-│   ├── cli/               # CLI commands + TUI dashboard
-│   ├── models/            # Data structures
-│   ├── config/            # Configuration management
-│   └── utils/             # Helper functions
-├── dashboard/             # React web dashboard
+│   ├── main.rs             # CLI entry point
+│   ├── api/                # REST API + WebSocket server
+│   │   ├── mod.rs          # API router
+│   │   ├── alerts.rs       # Alert endpoints
+│   │   ├── analytics.rs    # AI analyst
+│   │   ├── correlation.rs  # Event correlation
+│   │   ├── health.rs       # Health checks
+│   │   ├── metrics.rs      # Prometheus metrics
+│   │   ├── stats.rs        # System stats
+│   │   └── websocket.rs    # WebSocket handler
+│   ├── capture/            # Packet capture (pcap)
+│   ├── detection/          # Rule engine + heuristics
+│   ├── engine/             # Modular detection system
+│   │   ├── mod.rs          # DetectionEngine + Detector trait
+│   │   └── detectors/      # Individual detectors
+│   │       ├── mod.rs      # Detector utilities
+│   │       ├── port_scan.rs
+│   │       ├── brute_force.rs
+│   │       ├── anomaly.rs
+│   │       └── dos.rs
+│   ├── ai/                 # ML anomaly detection
+│   ├── logging/            # Alert management
+│   ├── cli/                # CLI commands + basic TUI
+│   ├── ui/                 # Advanced TUI components
+│   │   ├── mod.rs          # UI exports
+│   │   ├── dashboard.rs    # 4-panel advanced dashboard
+│   │   ├── sparkline.rs    # ASCII chart components
+│   │   └── aggregator.rs   # Alert deduplication
+│   ├── simulator/          # Attack simulation module
+│   │   └── mod.rs          # Traffic generator for testing
+│   ├── models/             # Data structures (PacketInfo, Alert, etc.)
+│   ├── config/             # Configuration management
+│   └── utils/              # Helper functions
+├── dashboard/              # React web dashboard
 │   ├── package.json
 │   ├── src/
 │   │   ├── App.js
 │   │   ├── pages/
 │   │   ├── components/
 │   │   └── utils/
-│   └── build/             # Production build
+│   └── build/              # Production build
 ├── config/
-│   ├── default.yaml       # Default configuration
-│   └── example.yaml       # Production example
+│   ├── default.yaml        # Default configuration
+│   └── example.yaml        # Production example
 ├── rules/
-│   └── default.yaml       # Detection rules
-└── logs/                  # Generated alert logs
+│   └── default.yaml        # Detection rules
+└── logs/                   # Generated alert logs
 ```
 
 ---

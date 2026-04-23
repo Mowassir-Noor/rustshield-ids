@@ -35,6 +35,14 @@ pub enum Commands {
         /// Enable TUI dashboard
         #[arg(short, long)]
         dashboard: bool,
+
+        /// Enable advanced TUI dashboard with 4-panel layout
+        #[arg(short, long)]
+        advanced: bool,
+
+        /// Enable attack simulation mode (for testing)
+        #[arg(short, long)]
+        simulate: bool,
     },
 
     /// Train the anomaly detection model on baseline traffic

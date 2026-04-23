@@ -141,3 +141,76 @@ pub struct FlowStats {
     pub fin_count: u32,
     pub rst_count: u32,
 }
+
+/// Detection result with AI reasoning
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DetectionResult {
+    pub detected: bool,
+    pub confidence: f64,
+    pub reason: String,
+    pub pattern: String,
+    pub severity: Severity,
+    pub indicators: Vec<String>,
+}
+
+/// Context-rich alert with full network details
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EnrichedAlert {
+    pub id: String,
+    pub timestamp: DateTime<Utc>,
+    pub severity: Severity,
+    pub alert_type: AlertType,
+    pub source_ip: IpAddr,
+    pub destination_ip: IpAddr,
+    pub source_port: Option<u16>,
+    pub destination_port: Option<u16>,
+    pub protocol: Protocol,
+    pub description: String,
+    pub details: AlertDetails,
+    pub detection_result: DetectionResult,
+    pub score: f64,
+}
+
+/// Aggregated alert group (for deduplication)
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AggregatedAlert {
+    pub group_id: String,
+    pub alert_type: String,
+    pub severity: Severity,
+    pub description: String,
+    pub source_ips: Vec<IpAddr>,
+    pub destination_ports: Vec<u16>,
+    pub count: usize,
+    pub first_seen: DateTime<Utc>,
+    pub last_seen: DateTime<Utc>,
+    pub sample_alert: EnrichedAlert,
+    pub detection_result: DetectionResult,
+}
+
+/// Time-series data point for sparklines
+#[derive(Debug, Clone, Default)]
+pub struct MetricPoint {
+    pub timestamp: DateTime<Utc>,
+    pub value: f64,
+}
+
+/// System metrics for TUI
+#[derive(Debug, Clone, Default)]
+pub struct SystemMetrics {
+    pub packets_per_second: f64,
+    pub alerts_per_second: f64,
+    pub active_connections: u32,
+    pub suspicious_ips: u32,
+    pub pps_history: Vec<MetricPoint>,
+    pub aps_history: Vec<MetricPoint>,
+}
+
+/// Top threat entry
+#[derive(Debug, Clone)]
+pub struct TopThreat {
+    pub source_ip: IpAddr,
+    pub threat_type: String,
+    pub severity: Severity,
+    pub count: usize,
+    pub last_seen: DateTime<Utc>,
+}

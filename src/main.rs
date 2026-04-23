@@ -10,8 +10,11 @@ mod cli;
 mod config;
 mod dashboard;
 mod detection;
+mod engine;
 mod logging;
 mod models;
+mod simulator;
+mod ui;
 mod utils;
 
 use cli::{Cli, Commands};
@@ -42,8 +45,10 @@ async fn main() -> Result<()> {
             config,
             interface,
             dashboard,
+            advanced,
+            simulate,
         } => {
-            cmd_run(config, interface, dashboard).await?;
+            cmd_run(config, interface, dashboard, advanced, simulate).await?;
         }
         Commands::Train {
             config,
@@ -74,10 +79,20 @@ async fn cmd_run(
     config_path: Option<PathBuf>,
     interface: Option<String>,
     use_dashboard: bool,
+    use_advanced: bool,
+    simulate: bool,
 ) -> Result<()> {
     info!("Starting IDS in monitoring mode");
 
     let config = Config::load(config_path)?;
+
+    // Use advanced dashboard if requested
+    if use_advanced {
+        let interface = interface.unwrap_or_else(|| "eth0".to_string());
+        ui::dashboard::run_advanced_dashboard(config, interface, simulate).await?;
+        return Ok(());
+    }
+
     let interface = interface
         .or_else(|| config.capture.interface.clone())
         .ok_or_else(|| anyhow::anyhow!("No network interface specified"))?;

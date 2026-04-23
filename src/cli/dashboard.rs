@@ -21,7 +21,6 @@ use std::time::{Duration, Instant};
 use tokio::sync::{mpsc, RwLock};
 use tracing::{error, info};
 
-
 /// Dashboard state
 struct DashboardState {
     alerts: VecDeque<Alert>,
@@ -245,7 +244,7 @@ fn draw_stats_panel(f: &mut Frame, area: Rect, state: &DashboardState) {
     f.render_widget(stats, area);
 }
 
-fn draw_stats_panel2(f: &mut Frame, area: Rect, state: &DashboardState) {}
+fn _draw_stats_panel2(_f: &mut Frame, _area: Rect, _state: &DashboardState) {}
 
 fn draw_alerts_panel(f: &mut Frame, area: Rect, state: &DashboardState) {
     let alerts_block = Block::default()
