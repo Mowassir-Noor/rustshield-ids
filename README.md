@@ -1,66 +1,108 @@
 # RustShield IDS
 
-**AI-Assisted Intrusion Detection System written in Rust**
+**SOC-Grade AI-Assisted Intrusion Detection & Response System**
 
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange)](https://www.rust-lang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-production--ready-green)]()
 
-A hybrid, modular IDS combining signature-based detection with AI-driven anomaly detection. Designed for real-time network monitoring, explainable alerting, and production-grade performance.
+A professional-grade, modular IDS/IPS combining signature-based detection, behavioral analysis, multi-stage attack correlation, and automated response. Designed for Security Operations Centers (SOC) with real-time threat hunting, forensic investigation, and AI-driven threat explanation.
 
 ---
 
 ## Features
 
-- **Dual Detection Engine**: Rule-based signatures + ML anomaly detection
-- **Modular Detection System**: Pluggable detectors with `Detector` trait (PortScan, BruteForce, Anomaly, DoS)
+### 🔍 Detection & Analysis
+- **Multi-Layer Detection**: Signature-based + Behavioral + Anomaly + Deep Packet Inspection
+- **Modular Detector System**: Pluggable `Detector` trait (PortScan, BruteForce, Anomaly, DoS)
+- **Behavioral Profiling**: Sliding window baselines with Z-score anomaly detection
+- **Deep Packet Inspection**: Payload analysis for SQLi, XSS, command injection patterns
 - **Real-time Packet Capture**: Native libpcap integration (TCP/UDP/ICMP)
 - **AI-Powered Analysis**: Isolation Forest-based anomaly detection with feature explainability
-- **Advanced TUI Dashboard**: 4-panel layout with sparklines, aggregation, and keyboard navigation
-- **Attack Simulation**: Built-in traffic generator for testing (port scan, brute force, DoS, SYN flood)
-- **REST API + WebSocket**: Full HTTP API with real-time streaming
-- **Web Dashboard**: React-based SOC interface with live updates
-- **AI Analyst**: Explainable insights with MITRE ATT&CK mapping
-- **Event Correlation**: Multi-stage attack detection
-- **Streaming Pipeline**: Zero-copy packet processing with bounded queues
-- **Configurable Rules**: YAML-based rule definitions with hot-reload
+
+### 🧠 Intelligence & Correlation
+- **Multi-Stage Attack Correlation**: Kill chain tracking (Recon → Initial Access → Execution → Impact)
+- **AI Explanation Layer**: Human-readable threat summaries with MITRE ATT&CK mapping
+- **Threat Intelligence**: Pattern recognition and historical precedent analysis
+- **Executive Reporting**: Automated security posture summaries
+
+### ⚡ Response & Defense
+- **Active Defense Engine**: Four response modes (Safe, Semi-Active, Active, Dry-Run)
+- **Automated Response Actions**: Rate limiting, temporary/permanent blocks, connection killing
+- **Response Rule Engine**: Configurable automation with cooldowns and severity thresholds
+- **Honeypot Integration**: Redirect suspicious traffic for analysis
+
+### 🖥️ Interface & Visualization
+- **Advanced TUI Dashboard**: 4-panel SOC layout with sparklines and threat graphs
+- **Attack Timeline View**: Kill chain visualization with stage progression
+- **Threat Graph**: IP → Ports → Attack Types relationship mapping
+- **Forensic Replay**: Historical attack reconstruction with variable speed
+- **REST API + WebSocket**: Full HTTP API for SIEM integration
+- **Web Dashboard**: React-based SOC interface
+
+### 🔧 Operations & Forensics
+- **Forensic Investigation Sessions**: Time-boxed analysis with filtering and notes
+- **Historical Replay**: Reconstruct attack timelines for post-incident analysis
+- **Attack Simulation**: Multi-stage scenario generation for testing
+- **Evidence Collection**: Automated packet capture and alert correlation
 - **Structured Logging**: JSON/pretty output with rotation
-- **Alert Management**: Severity scoring, deduplication, rate limiting
-- **Explainable AI**: Detailed deviation reports for anomaly alerts
 
 ---
 
 ## System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        RustShield IDS Platform                      │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌──────────────┐     ┌──────────────┐     ┌─────────────────────┐│
-│  │   Capture    │────▶│   Packet     │────▶│    Detection        ││
-│  │   (pcap)     │     │   Pipeline   │     │    Engine           ││
-│  └──────────────┘     └──────────────┘     └──────────┬──────────┘│
-│                                                      │             │
-│                           ┌──────────────────────────┤             │
-│                           │                          │             │
-│  ┌──────────────┐     ┌───▼──────┐         ┌────────▼────────┐   │
-│  │   Anomaly    │◀────│   AI     │         │  Rule-Based      │   │
-│  │   Scoring    │     │  Engine  │         │    Engine        │   │
-│  └──────┬───────┘     └──────────┘         └──────────────────┘   │
-│         │                                                           │
-│  ┌──────▼───────┐     ┌──────────────┐     ┌─────────────┐        │
-│  │   Alert      │────▶│Correlation  │────▶│    API      │        │
-│  │   Scoring    │     │   Engine     │     │   Server    │        │
-│  └──────────────┘     └──────────────┘     └──────┬──────┘        │
-│                                                  │                 │
-│                         ┌────────────────────────┘                 │
-│                         │                                          │
-│  ┌──────────────────────▼──────┐    ┌───────────────────┐         │
-│  │    REST API + WebSocket     │◀───│   Web Dashboard   │         │
-│  │   /alerts /stats /ws        │    │   (React)         │         │
-│  └─────────────────────────────┘    └───────────────────┘         │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    RustShield SOC IDS/IPS Platform                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  INGESTION                    DETECTION & ANALYSIS                          │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐              │
+│  │  Packet  │───▶│   DPI    │───▶│ Modular  │───▶│Behavioral│              │
+│  │ Capture  │    │ Analysis │    │Detectors │    │Profiling │              │
+│  │ (pcap)   │    │          │    │          │    │          │              │
+│  └──────────┘    └──────────┘    └────┬─────┘    └────┬─────┘              │
+│                                       │              │                      │
+│                              ┌────────▼──────────────▼─────┐                │
+│                              │     CORRELATION ENGINE       │                │
+│                              │  • Kill Chain Tracking        │                │
+│                              │  • Multi-Stage Detection      │                │
+│                              │  • Attack Categorization      │                │
+│                              └─────────────┬────────────────┘                │
+│                                            │                                 │
+│  INTELLIGENCE                              ▼                                 │
+│  ┌──────────┐    ┌──────────┐    ┌──────────────┐                          │
+│  │   AI     │◀───│  Threat  │◀───│  Correlated  │                          │
+│  │Explanation│    │Intellect │    │   Attacks    │                          │
+│  │  MITRE   │    │          │    │              │                          │
+│  └──────────┘    └──────────┘    └──────┬───────┘                          │
+│                                         │                                   │
+│  RESPONSE                               ▼                                   │
+│  ┌──────────┐    ┌──────────┐    ┌──────────────┐                          │
+│  │ Response │◀───│  Action  │◀───│     SOC      │                          │
+│  │  Engine  │    │  Engine  │    │   Engine     │                          │
+│  │• Block  │    │          │    │              │                          │
+│  │• Rate   │    └──────────┘    └──────┬───────┘                          │
+│  │  Limit  │                           │                                   │
+│  │• Kill   │                           ▼                                   │
+│  │  Conn   │    ┌──────────┐    ┌──────────────┐                          │
+│  └──────────┘    │ Forensics│◀───│   Evidence   │                          │
+│                  │          │    │  Collection  │                          │
+│                  │• Timeline│    │              │                          │
+│                  │• Replay  │    └──────────────┘                          │
+│                  │• Sessions│                                               │
+│                  └──────────┘                                               │
+│                                                                             │
+│  INTERFACES                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                      │
+│  │   TUI SOC    │  │  REST API    │  │   Web UI     │                      │
+│  │  Dashboard   │  │  + WS        │  │  (React)     │                      │
+│  │• 4-Panel     │  │              │  │              │                      │
+│  │• Timeline    │  │              │  │              │                      │
+│  │• Threat Graph│  │              │  │              │                      │
+│  └──────────────┘  └──────────────┘  └──────────────┘                      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -316,6 +358,230 @@ rustshield run --advanced --simulate
 # - SYN flood attacks
 # - Volume-based DoS patterns
 ```
+
+---
+
+## 🎯 SOC-Grade Features
+
+### Threat Correlation Engine
+
+Multi-stage attack detection correlates individual alerts into coordinated attack campaigns.
+
+**Kill Chain Tracking**:
+```
+Reconnaissance → Initial Access → Execution → Persistence → Impact
+```
+
+**Correlation Patterns**:
+| Pattern | Stages | Confidence |
+|---------|--------|------------|
+| Scan-Exploit-Flood | Port Scan → Brute Force → DoS | 90% |
+| Recon-BruteForce | Port Scan → SSH Brute Force | 85% |
+| Sustained DoS | Multiple DoS waves | 80% |
+
+**Attack Categories**:
+- **Multi-Stage Intrusion**: Reconnaissance followed by exploitation
+- **Ransomware Campaign**: Data collection + encryption indicators
+- **Data Exfiltration**: Large transfers to external IPs
+- **APT Activity**: Slow, persistent multi-phase attacks
+- **DoS Campaign**: Sustained availability attacks
+
+**Example Correlated Attack**:
+```json
+{
+  "id": "CORR-1640995200000-192.168.100.50",
+  "attacker_ip": "192.168.100.50",
+  "attack_type": "Multi-Stage Intrusion",
+  "stages": [
+    { "stage": 1, "type": "Reconnaissance", "description": "Port scan: 100 ports" },
+    { "stage": 2, "type": "Initial Access", "description": "SSH brute force: 20 attempts" },
+    { "stage": 3, "type": "Impact", "description": "SYN flood: 500+ SYN/sec" }
+  ],
+  "combined_confidence": 0.92,
+  "severity": "Critical",
+  "is_ongoing": true
+}
+```
+
+---
+
+### Behavioral Profiling
+
+Learns normal traffic patterns and flags deviations using statistical analysis.
+
+**Sliding Window Statistics** (5-minute windows, 1-hour history):
+- Packets per second (mean + std dev)
+- Bytes per second
+- Unique ports accessed
+- SYN packet ratio
+- Connection rates
+
+**Behavior Flags**:
+| Flag | Trigger | Default Severity |
+|------|---------|------------------|
+| New IP | First contact from unknown source | Low |
+| Traffic Spike | >3σ above baseline | Medium |
+| Port Scan Behavior | >10 ports in 1 minute | High |
+| Burst Activity | Sudden spike then silence | Medium |
+| Protocol Anomaly | Unexpected protocol usage | Medium |
+
+**Z-Score Calculation**:
+```
+z_score = (current_value - baseline_mean) / baseline_std
+
+Alert if |z_score| > 3.0 (99.7% confidence)
+```
+
+---
+
+### Active Defense Engine
+
+Automated response system with configurable aggression levels.
+
+**Response Modes**:
+| Mode | Description | Use Case |
+|------|-------------|----------|
+| **Safe** | Monitor only, no active response | Production, initial deployment |
+| **Dry-Run** | Log actions without executing | Testing new rules |
+| **Semi-Active** | Rate limiting only | Conservative defense |
+| **Active** | Full blocking capabilities | Confirmed attacks |
+
+**Response Actions**:
+| Action | Description | Duration |
+|--------|-------------|----------|
+| Log Only | Record alert | Permanent |
+| Notify | Send security alert | - |
+| Rate Limit | Cap at 100 pps | Until resolved |
+| Temporary Block | Firewall drop | 15 minutes |
+| Permanent Block | Firewall drop | Until manual unblock |
+| Kill Connections | RST injection | Immediate |
+| Honeypot Redirect | Route to decoy | Until resolved |
+
+**Response Rules** (YAML configuration):
+```yaml
+response_rules:
+  - name: "Critical Severity Block"
+    conditions:
+      min_severity: "Critical"
+      min_confidence: 0.9
+    action: "PermanentBlock"
+    cooldown_secs: 60
+
+  - name: "Brute Force Response"
+    conditions:
+      alert_patterns: ["Brute Force"]
+      min_alerts: 5
+    action: "TemporaryBlock"
+    cooldown_secs: 900
+```
+
+---
+
+### Deep Packet Inspection (DPI)
+
+Lightweight payload analysis for attack signature detection.
+
+**Detected Patterns**:
+- **SQL Injection**: `' OR '1'='1`, `UNION SELECT`, `DROP TABLE`
+- **XSS**: `<script>`, `javascript:`, `onerror=`, `onload=`
+- **Command Injection**: `; rm -rf`, `| /bin/sh`, `$(`, `` ` ``
+- **Directory Traversal**: `../`, `/etc/passwd`, `boot.ini`
+- **Scanner Fingerprints**: `nmap`, `masscan`, `sqlmap`, `nikto`
+
+**Entropy Analysis**:
+- High entropy (>7.0): Encoded/encrypted payloads
+- Low entropy (<2.0): Padding/malformed packets
+- Repeated patterns: Buffer overflow candidates
+
+**Example DPI Alert**:
+```json
+{
+  "pattern_type": "SuspiciousString",
+  "matched_signatures": ["UNION SELECT", "../"],
+  "entropy": 4.2,
+  "printable_ratio": 0.85,
+  "payload_sample": "GET /search?q=' UNION SELECT * FROM users--",
+  "severity": "High"
+}
+```
+
+---
+
+### AI Explanation Layer
+
+Generates human-readable threat analysis and executive summaries.
+
+**Explanation Components**:
+- **Summary**: One-line threat description
+- **Detailed Analysis**: Technical breakdown with context
+- **Threat Assessment**: Severity + confidence scoring
+- **Impact Evaluation**: Business impact assessment
+- **Recommendations**: Prioritized action items
+
+**MITRE ATT&CK Mapping**:
+| Pattern | Technique ID | Tactic |
+|---------|--------------|--------|
+| Port Scan | T1046 | Discovery |
+| Brute Force | T1110 | Credential Access |
+| DoS | T1499 | Impact |
+| Data Exfiltration | T1041 | Exfiltration |
+
+**Executive Summary Example**:
+```
+Security Posture Summary (127 alerts, 3 critical, 8 high)
+
+Active Multi-Stage Attacks:
+  • Multi-Stage Intrusion from 192.168.100.50 (92% confidence)
+
+Top Threat Patterns:
+  • Port Scan: 45 occurrences
+  • SYN Flood: 23 occurrences
+  • SSH Brute Force: 12 occurrences
+
+Recommendation: IMMEDIATE ACTION REQUIRED - Critical threats detected
+```
+
+---
+
+### Forensics & Investigation
+
+Post-incident analysis and attack timeline reconstruction.
+
+**Investigation Sessions**:
+```rust
+// Create forensic session
+let session = soc.create_forensic_session(
+    "APT Investigation #1",
+    ForensicFilters {
+        time_start: Some(Utc::now() - Duration::hours(24)),
+        source_ips: vec![attacker_ip],
+        severity_min: Some("High".to_string()),
+        ..Default::default()
+    }
+).await;
+```
+
+**Timeline Reconstruction**:
+- Chronological attack progression
+- Kill chain stage visualization
+- Cross-reference with response actions
+- Export to JSON for reporting
+
+**Historical Replay**:
+```bash
+# Replay attack at 2x speed
+rustshield forensics replay --session SESS-1234 --speed 2.0
+
+# Pause on each critical alert
+rustshield forensics replay --pause-on-alert --severity critical
+```
+
+**Features**:
+- Time-indexed alert storage (10,000 alerts)
+- Packet sample retention (1,000 samples)
+- Point-in-time snapshots (5-minute intervals)
+- Investigation notes and collaboration
+- Session export to JSON
 
 ---
 
@@ -585,6 +851,7 @@ alerting:
 
 ## Future Improvements
 
+### ✅ Completed
 - [x] REST API + WebSocket streaming
 - [x] Web Dashboard (React)
 - [x] AI Analyst with MITRE ATT&CK mapping
@@ -592,14 +859,25 @@ alerting:
 - [x] Modular Detection System (Detector trait)
 - [x] Advanced TUI Dashboard (4-panel + sparklines)
 - [x] Attack Simulation Module
+- [x] **SOC-Grade Correlation Engine** (Kill chain tracking)
+- [x] **Behavioral Profiling** (Sliding window baselines)
+- [x] **Active Defense Engine** (Automated response)
+- [x] **Deep Packet Inspection** (Payload analysis)
+- [x] **Forensics Module** (Timeline replay, investigation sessions)
+- [x] **AI Explanation Layer** (Human-readable threat summaries)
+
+### 🚧 In Progress / Planned
 - [ ] HTTP/HTTPS analysis via proxy integration
 - [ ] eBPF-based kernel-space filtering
 - [ ] Distributed sensor aggregation
 - [ ] Suricata rule compatibility
 - [ ] Automatic model retraining
 - [ ] GeoIP enrichment
-- [ ] Threat intelligence feeds
+- [ ] Threat intelligence feeds (MISP, OTX integration)
 - [ ] TLS inspection (MITM with CA)
+- [ ] Container/Docker deployment
+- [ ] Kubernetes operator
+- [ ] SIEM integrations (Splunk, ELK, Sentinel)
 
 ---
 
@@ -632,6 +910,8 @@ rustshield-ids/
 │   │       ├── anomaly.rs
 │   │       └── dos.rs
 │   ├── ai/                 # ML anomaly detection
+│   ├── ai_explainer/       # AI threat explanation layer
+│   │   └── mod.rs          # Human-readable threat summaries
 │   ├── logging/            # Alert management
 │   ├── cli/                # CLI commands + basic TUI
 │   ├── ui/                 # Advanced TUI components
@@ -639,6 +919,18 @@ rustshield-ids/
 │   │   ├── dashboard.rs    # 4-panel advanced dashboard
 │   │   ├── sparkline.rs    # ASCII chart components
 │   │   └── aggregator.rs   # Alert deduplication
+│   ├── correlator/         # Multi-stage attack correlation
+│   │   └── mod.rs          # Kill chain tracking
+│   ├── profiler/           # Behavioral profiling
+│   │   └── mod.rs          # Baseline learning + Z-score analysis
+│   ├── response/           # Active defense engine
+│   │   └── mod.rs          # Automated response actions
+│   ├── dpi/                # Deep packet inspection
+│   │   └── mod.rs          # Payload analysis + pattern detection
+│   ├── forensics/          # Forensic investigation
+│   │   └── mod.rs          # Timeline replay + evidence collection
+│   ├── soc/                # SOC integration layer
+│   │   └── mod.rs          # Central orchestration hub
 │   ├── simulator/          # Attack simulation module
 │   │   └── mod.rs          # Traffic generator for testing
 │   ├── models/             # Data structures (PacketInfo, Alert, etc.)

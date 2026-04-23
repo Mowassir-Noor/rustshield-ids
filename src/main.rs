@@ -4,16 +4,23 @@ use std::path::PathBuf;
 use tracing::info;
 
 mod ai;
+mod ai_explainer;
 mod api;
 mod capture;
 mod cli;
 mod config;
+mod correlator;
 mod dashboard;
 mod detection;
+mod dpi;
 mod engine;
+mod forensics;
 mod logging;
 mod models;
+mod profiler;
+mod response;
 mod simulator;
+mod soc;
 mod ui;
 mod utils;
 
